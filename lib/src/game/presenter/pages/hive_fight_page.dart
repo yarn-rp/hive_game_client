@@ -7,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexagon/hexagon.dart';
 import 'package:hive_game_client/core/widgets/animated_fade_in_fade_out/animated_fade_in_fade_out.dart';
 import 'package:hive_game_client/core/widgets/dedicated_app_bar/dedicated_app_bar.dart';
+import 'package:hive_game_client/core/widgets/dialogs/dialogs.dart';
 import 'package:hive_game_client/src/game/bloc/game_bloc.dart';
 import 'package:hive_game_client/src/game/models/insect/insect.dart';
 import 'package:hive_game_client/src/game/models/models.dart';
@@ -91,7 +92,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
             return Column(
               children: [
                 Container(
-                  height: 100,
+                  height: 75,
                   child: Stack(
                     children: [
                       AnimatedFadeInFadeOut(
@@ -125,25 +126,20 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                         shouldShow: () => state is Player2Turn,
                         shouldShrink: false,
                         child: Container(
-                          height: 100,
+                          height: 75,
                           color: Theme.of(context).backgroundColor,
-                          child: ListView.separated(
+                          child: ListView.builder(
                             physics: const BouncingScrollPhysics(
                               parent: AlwaysScrollableScrollPhysics(),
                             ),
                             scrollDirection: Axis.horizontal,
-                            separatorBuilder: (context, index) {
-                              return SizedBox(
-                                width: 10,
-                              );
-                            },
                             padding: const EdgeInsets.symmetric(
-                                vertical: 5, horizontal: 20),
+                                vertical: 5, horizontal: 10),
                             itemCount: state.player1Hand.length,
                             itemBuilder: (context, index) {
                               final _insect = state.player1Hand[index];
                               return HexagonWidget(
-                                width: 90,
+                                width: 60,
                                 type: HexagonType.FLAT,
                                 padding: 4.0,
                                 cornerRadius: 8.0,
@@ -154,17 +150,25 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                   children: [
                                     GestureDetector(
                                       onTap: () {
-                                        setState(() {
-                                          selectedInsect = _insect;
-                                          log('Selected insect is now $_insect');
-                                        });
+                                        if (selectedInsect == _insect) {
+                                          setState(() {
+                                            selectedInsect = null;
+                                          });
+                                        } else {
+                                          setState(() {
+                                            selectedInsect = _insect;
+                                            log('Selected insect is now $_insect');
+                                          });
+                                        }
                                       },
                                     ),
-                                    IgnorePointer(
-                                      child: Icon(
-                                        _insect.icon,
-                                        size: 50,
-                                        color: Theme.of(context).cardColor,
+                                    Center(
+                                      child: IgnorePointer(
+                                        child: Icon(
+                                          _insect.icon,
+                                          size: 24,
+                                          color: Theme.of(context).cardColor,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -248,7 +252,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                 cornerRadius: 8.0,
                                 elevation: 8,
                                 color: _isPossiblePositionForSelectInsect
-                                    ? tileColor.withOpacity(0.5)
+                                    ? Theme.of(context).canvasColor
                                     : tileColor,
                                 child: Stack(
                                   alignment: Alignment.center,
@@ -256,32 +260,56 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                     GestureDetector(
                                       onTap: () {
                                         if (selectedInsect != null) {
-                                          context.read<GameBloc>().add(
-                                              SetNewInsect(
-                                                  selectedInsect!,
-                                                  Position(coordinates.x,
-                                                      coordinates.y)));
+                                          if (!(selectedInsect
+                                                  ?.possiblePositions
+                                                  .contains(Position(
+                                                      coordinates.x,
+                                                      coordinates.y)) ??
+                                              true)) {
+                                            showErrorDialog(
+                                                context: context,
+                                                title: 'Movimiento invalido',
+                                                description:
+                                                    'Este insecto no se puede mover a esta posicion');
+                                          } else {
+                                            context.read<GameBloc>().add(
+                                                SetNewInsect(
+                                                    selectedInsect!,
+                                                    Position(coordinates.x,
+                                                        coordinates.y)));
+                                          }
+
+                                          setState(() {
+                                            selectedInsect = null;
+                                            log('Selected insect is now $_insect');
+                                          });
+                                        } else {
+                                          setState(() {
+                                            selectedInsect = _insect;
+                                            log('Selected insect is now $_insect');
+                                          });
                                         }
-                                        setState(() {
-                                          selectedInsect = _insect;
-                                          log('Selected insect is now $_insect');
-                                        });
                                       },
                                     ),
                                     IgnorePointer(
-                                      child: (_insect != null)
-                                          ? Icon(
-                                              _insect.icon,
-                                              size: 100,
-                                              color:
-                                                  Theme.of(context).cardColor,
-                                            )
-                                          : Text(
-                                              '(${coordinates.x},${coordinates.y})',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .headline4,
-                                            ),
+                                      child: LayoutBuilder(
+                                        builder: (context, constraints) {
+                                          return (_insect != null)
+                                              ? Icon(
+                                                  _insect.icon,
+                                                  size:
+                                                      constraint.maxHeight / 10,
+                                                  color: Theme.of(context)
+                                                      .cardColor,
+                                                )
+                                              : Text(
+                                                  '(${coordinates.x},${coordinates.y})',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .headline4,
+                                                );
+                                        },
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -294,7 +322,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                   ),
                 ),
                 Container(
-                  height: 100,
+                  height: 75,
                   color: Theme.of(context).backgroundColor,
                   child: Stack(
                     children: [
@@ -337,12 +365,12 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                           ),
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.symmetric(
-                              vertical: 5, horizontal: 20),
+                              vertical: 5, horizontal: 10),
                           itemCount: state.player2Hand.length,
                           itemBuilder: (context, index) {
                             final _insect = state.player2Hand[index];
                             return HexagonWidget(
-                              width: 90,
+                              width: 60,
                               type: HexagonType.FLAT,
                               padding: 4.0,
                               cornerRadius: 8.0,
@@ -353,17 +381,25 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                 children: [
                                   GestureDetector(
                                     onTap: () {
-                                      setState(() {
-                                        selectedInsect = _insect;
-                                        log('Selected insect is now $_insect');
-                                      });
+                                      if (selectedInsect == _insect) {
+                                        setState(() {
+                                          selectedInsect = null;
+                                        });
+                                      } else {
+                                        setState(() {
+                                          selectedInsect = _insect;
+                                          log('Selected insect is now $_insect');
+                                        });
+                                      }
                                     },
                                   ),
-                                  IgnorePointer(
-                                    child: FaIcon(
-                                      _insect.icon,
-                                      size: 50,
-                                      color: Theme.of(context).cardColor,
+                                  Center(
+                                    child: IgnorePointer(
+                                      child: FaIcon(
+                                        _insect.icon,
+                                        size: 24,
+                                        color: Theme.of(context).cardColor,
+                                      ),
                                     ),
                                   ),
                                 ],

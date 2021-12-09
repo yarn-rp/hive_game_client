@@ -16,4 +16,15 @@ class Arena {
   });
 
   factory Arena.fromJson(Map<String, dynamic> json) => _$ArenaFromJson(json);
+
+  Arena copyWith({
+    List<Insect>? player1Insects,
+    List<Insect>? player2Insects,
+    String? currentPlayerId,
+  }) =>
+      Arena(
+        player1Insects: player1Insects ?? this.player1Insects,
+        currentPlayerId: currentPlayerId ?? this.currentPlayerId,
+        player2Insects: player2Insects ?? this.player2Insects,
+      );
 }

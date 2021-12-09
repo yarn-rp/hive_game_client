@@ -34,8 +34,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
                 Position(0, 1),
               ],
             ),
-            QueenBee(
-              name: 'Abeja reina',
+            LadyBug(
+              name: 'Mariquita',
               position: Position(0, 0),
               possiblePositions: [
                 Position(1, 0),
@@ -46,8 +46,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
                 Position(0, 1),
               ],
             ),
-            QueenBee(
-              name: 'Abeja reina',
+            Grasshopper(
+              name: 'Saltamontes',
               position: Position(0, 0),
               possiblePositions: [
                 Position(1, 0),
@@ -58,8 +58,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
                 Position(0, 1),
               ],
             ),
-            QueenBee(
-              name: 'Abeja reina',
+            Spider(
+              name: 'Araña',
               position: Position(0, 0),
               possiblePositions: [
                 Position(1, 0),
@@ -70,8 +70,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
                 Position(0, 1),
               ],
             ),
-            QueenBee(
-              name: 'Abeja reina',
+            SoldierAnt(
+              name: 'hormiguita',
               position: Position(0, 0),
               possiblePositions: [
                 Position(1, 0),
@@ -102,12 +102,16 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       log('On set Insect');
       if (state is Player1Turn) {
         log('Going to chance to player2 Insect');
+
         emit(
           Player2Turn(
-            arena: state.arena,
+            arena: state.arena
+              ..player1Insects.add(event.insect.copyWith(
+                position: event.position,
+              )),
             player1Name: player1Name,
             player2Name: player2Name,
-            player1Hand: state.player1Hand,
+            player1Hand: state.player1Hand..remove(event.insect),
             player2Hand: state.player2Hand,
           ),
         );
@@ -116,11 +120,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           log('Going to chance to player1 Insect');
           emit(
             Player1Turn(
-              arena: state.arena,
+              arena: state.arena
+                ..player2Insects.add(event.insect.copyWith(
+                  position: event.position,
+                )),
               player1Name: player1Name,
               player2Name: player2Name,
               player1Hand: state.player1Hand,
-              player2Hand: state.player2Hand,
+              player2Hand: state.player2Hand..remove(event.insect),
             ),
           );
         }
