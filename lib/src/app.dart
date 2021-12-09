@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_game_client/core/theme/dark_theme.dart';
 import 'package:hive_game_client/core/theme/light_theme.dart';
+import 'package:hive_game_client/src/landing/presenter/pages/onlanding_page.dart';
 
 import 'game/presenter/pages/hive_fight_page.dart';
 
@@ -24,6 +27,7 @@ class MyApp extends StatelessWidget {
       // returns to the app after it has been killed while running in the
       // background.
       restorationScopeId: 'app',
+      debugShowCheckedModeBanner: false,
 
       // Provide the generated AppLocalizations to the MaterialApp. This
       // allows descendant Widgets to display the correct translations
@@ -42,7 +46,7 @@ class MyApp extends StatelessWidget {
       // SettingsController to display the correct theme.
       theme: themeLight,
       darkTheme: themeDark,
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.system,
 
       // Define a function to handle named routes in order to support
       // Flutter web url navigation and deep linking.
@@ -51,17 +55,17 @@ class MyApp extends StatelessWidget {
           settings: routeSettings,
           builder: (BuildContext context) {
             switch (routeSettings.name) {
-              case ArenaHivePage.routeName:
-                return const ArenaHivePage(
-                  playerOne: '',
-                  playerTwo: '',
+              case OnlandingPage.routeName:
+                return const OnlandingPage();
+
+              case ArenaPvsPPage.routeName:
+                return ArenaPvsPPage(
+                  playerOne: (routeSettings.arguments as Map)['playerOne'],
+                  playerTwo: (routeSettings.arguments as Map)['playerTwo'],
                 );
 
               default:
-                return const ArenaHivePage(
-                  playerOne: '',
-                  playerTwo: '',
-                );
+                return const OnlandingPage();
             }
           },
         );

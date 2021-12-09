@@ -13,16 +13,17 @@ final ThemeData themeLight = ThemeData(
   brightness: Brightness.light,
   textTheme: textLightTheme,
   splashFactory: InkRipple.splashFactory,
-  canvasColor: const Color(0xffF9F9F9),
+  canvasColor: const Color(0xFFE9E8E8),
   // textTheme: textTheme,
   // platform: TargetPlatform.android,
   cardColor: const Color(0xffF9F9F9),
+
   // cardTheme: const CardTheme(
   //   color: Color(0xffF9F9F9),
   //   elevation: 0,
   // ),685639373
   cupertinoOverrideTheme: const CupertinoThemeData(
-    primaryColor: Color(0xff1D99DD),
+    primaryColor: Color(0xFFA79FD7),
     textTheme: CupertinoTextThemeData(
       primaryColor: Color(0xff3EE78A),
       tabLabelTextStyle: TextStyle(
@@ -33,12 +34,12 @@ final ThemeData themeLight = ThemeData(
     ),
   ),
   textSelectionTheme: const TextSelectionThemeData(
-    cursorColor: Color(0xff1D99DD),
+    cursorColor: Color(0xFFA79FD7),
   ),
 
   dividerColor: const Color(0xffD2D2D2),
   fontFamily: 'PNRegular',
-  primaryColor: const Color(0xff1D99DD),
+  primaryColor: const Color(0xFFA79FD7),
   // tabBarTheme: tabBarThemeLight,
 
   dividerTheme: const DividerThemeData(
@@ -68,7 +69,7 @@ final ThemeData themeLight = ThemeData(
     ),
     focusedBorder: UnderlineInputBorder(
       borderSide: BorderSide(
-        color: Color(0xff1D99DD),
+        color: Color(0xFFA79FD7),
       ),
     ),
     labelStyle: TextStyle(
@@ -89,19 +90,19 @@ final ThemeData themeLight = ThemeData(
   // cupertinoOverrideTheme: CupertinoTheme(),
 
   colorScheme: ColorScheme.fromSwatch(
-    accentColor: const Color(0xff1FD970),
+    accentColor: const Color(0xFF84DCE3),
     primarySwatch: const MaterialColor(
       400,
       {
-        100: Color(0xff1D99DD),
-        200: Color(0xff1D99DD),
-        300: Color(0xff1D99DD),
-        400: Color(0xff1D99DD),
-        500: Color(0xff1D99DD),
-        600: Color(0xff1D99DD),
-        700: Color(0xff1D99DD),
-        800: Color(0xff1D99DD),
-        900: Color(0xff1D99DD),
+        100: Color(0xFFA79FD7),
+        200: Color(0xFFA79FD7),
+        300: Color(0xFFA79FD7),
+        400: Color(0xFFA79FD7),
+        500: Color(0xFFA79FD7),
+        600: Color(0xFFA79FD7),
+        700: Color(0xFFA79FD7),
+        800: Color(0xFFA79FD7),
+        900: Color(0xFFA79FD7),
       },
     ),
     // primary: orange,

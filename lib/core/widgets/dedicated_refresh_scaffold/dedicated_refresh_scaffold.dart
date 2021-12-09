@@ -25,7 +25,7 @@ class DedicatedScaffold extends StatelessWidget {
   final bool tapToExitKeyboard;
   @override
   Widget build(BuildContext context) {
-    if (Platform.isIOS) {
+    if (Theme.of(context).platform != TargetPlatform.android) {
       return SafeArea(
         top: false,
         right: false,

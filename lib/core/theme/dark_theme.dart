@@ -26,13 +26,13 @@ final ThemeData themeDark = ThemeData(
   canvasColor: const Color(0xff121212),
   textTheme: textDarkTheme,
   // textTheme: textTheme,
-  primaryColor: const Color(0xff1D99DD),
+  primaryColor: const Color(0xFF1DD6E2),
   // tabBarTheme: tabBarThemeLight,
   // platform: TargetPlatform.android,
   cupertinoOverrideTheme: const CupertinoThemeData(
-    primaryColor: Color(0xff1D99DD),
+    primaryColor: Color(0xFF1DD6E2),
     textTheme: CupertinoTextThemeData(
-      primaryColor: Color(0xff3EE78A),
+      primaryColor: Color(0xff6853D9),
       tabLabelTextStyle: TextStyle(
         fontSize: 10,
         color: white,
@@ -59,7 +59,7 @@ final ThemeData themeDark = ThemeData(
     ),
     focusedBorder: UnderlineInputBorder(
       borderSide: BorderSide(
-        color: Color(0xff1D99DD),
+        color: Color(0xFF1DD6E2),
       ),
     ),
     labelStyle: TextStyle(
@@ -75,7 +75,7 @@ final ThemeData themeDark = ThemeData(
   ),
 
   textSelectionTheme: const TextSelectionThemeData(
-    cursorColor: Color(0xff1D99DD),
+    cursorColor: Color(0xFF1DD6E2),
   ),
   dividerTheme: const DividerThemeData(
     color: Color(0xff121212),
@@ -110,19 +110,19 @@ final ThemeData themeDark = ThemeData(
     ),
   ),
   colorScheme: ColorScheme.fromSwatch(
-    accentColor: const Color(0xff1FD970),
+    accentColor: const Color(0xff6853D9),
     primarySwatch: const MaterialColor(
       400,
       {
-        100: Color(0xff1D99DD),
-        200: Color(0xff1D99DD),
-        300: Color(0xff1D99DD),
-        400: Color(0xff1D99DD),
-        500: Color(0xff1D99DD),
-        600: Color(0xff1D99DD),
-        700: Color(0xff1D99DD),
-        800: Color(0xff1D99DD),
-        900: Color(0xff1D99DD),
+        100: Color(0xFF1DD6E2),
+        200: Color(0xFF1DD6E2),
+        300: Color(0xFF1DD6E2),
+        400: Color(0xFF1DD6E2),
+        500: Color(0xFF1DD6E2),
+        600: Color(0xFF1DD6E2),
+        700: Color(0xFF1DD6E2),
+        800: Color(0xFF1DD6E2),
+        900: Color(0xFF1DD6E2),
       },
     ),
 

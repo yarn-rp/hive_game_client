@@ -10,7 +10,7 @@ abstract class Insect with EquatableMixin {
   final String name;
   final Position? position;
   final List<Position> possiblePositions;
-  final IconData icon;
+  final String icon;
 
   Insect(
     this.name,
@@ -42,7 +42,7 @@ class QueenBee extends Insect {
           name,
           position,
           possiblePositions,
-          FontAwesomeIcons.behance,
+          'queen_bee',
         );
 
   factory QueenBee.fromJson(Map<String, dynamic> json) =>
@@ -70,7 +70,7 @@ class Beetle extends Insect {
           name,
           position,
           possiblePositions,
-          FontAwesomeIcons.accusoft,
+          'bettle',
         );
 
   @override
@@ -95,7 +95,7 @@ class Grasshopper extends Insect {
           name,
           position,
           possiblePositions,
-          FontAwesomeIcons.adjust,
+          'grasshopper',
         );
 
   @override
@@ -120,7 +120,7 @@ class Spider extends Insect {
           name,
           position,
           possiblePositions,
-          FontAwesomeIcons.adjust,
+          'spider',
         );
 
   @override
@@ -145,7 +145,7 @@ class SoldierAnt extends Insect {
           name,
           position,
           possiblePositions,
-          FontAwesomeIcons.xRay,
+          'ant',
         );
 
   @override
@@ -170,7 +170,7 @@ class LadyBug extends Insect {
           name,
           position,
           possiblePositions,
-          FontAwesomeIcons.youtube,
+          'lady_bug',
         );
 
   @override

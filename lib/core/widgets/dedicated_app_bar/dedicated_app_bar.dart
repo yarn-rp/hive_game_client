@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:hive_game_client/core/widgets/dedicated_buttons/dedicated_button.dart';
@@ -90,19 +91,22 @@ class DedicatedAppBar extends StatelessWidget implements PreferredSizeWidget {
                             )),
                   backgroundColor: backgroundColor ??
                       Theme.of(context).backgroundColor.withOpacity(0.90),
-                  leading: leading ??
-                      ((title != null && (centerTitle != null && !centerTitle!))
-                          ? Align(
-                              alignment: Alignment.centerLeft,
-                              child: title,
-                            )
-                          : (Navigator.canPop(context)
-                              ? DedicatedIconButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  icon: BackButtonIcon())
-                              : null)),
+                  leading: kIsWeb
+                      ? const SizedBox.shrink()
+                      : leading ??
+                          ((title != null &&
+                                  (centerTitle != null && !centerTitle!))
+                              ? Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: title,
+                                )
+                              : (Navigator.canPop(context)
+                                  ? DedicatedIconButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      icon: BackButtonIcon())
+                                  : null)),
                   middle: (centerTitle != null && centerTitle!) ? title : null,
                   trailing: trailing,
                   transitionBetweenRoutes: false,
@@ -126,19 +130,21 @@ class DedicatedAppBar extends StatelessWidget implements PreferredSizeWidget {
                     )),
           backgroundColor: backgroundColor ??
               Theme.of(context).backgroundColor.withOpacity(0.90),
-          leading: leading ??
-              ((title != null && (centerTitle != null && !centerTitle!))
-                  ? Align(
-                      alignment: Alignment.centerLeft,
-                      child: title,
-                    )
-                  : (canPop
-                      ? DedicatedIconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: BackButtonIcon())
-                      : null)),
+          leading: kIsWeb
+              ? const SizedBox.shrink()
+              : leading ??
+                  ((title != null && (centerTitle != null && !centerTitle!))
+                      ? Align(
+                          alignment: Alignment.centerLeft,
+                          child: title,
+                        )
+                      : (canPop
+                          ? DedicatedIconButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              icon: BackButtonIcon())
+                          : null)),
           middle: (centerTitle != null && centerTitle!) ? title : null,
           trailing: trailing,
           transitionBetweenRoutes: false,

@@ -1,16 +1,16 @@
 part of 'game_bloc.dart';
 
 @immutable
-abstract class GameEvent {}
+abstract class GamePvsPEvent {}
 
-class SetNewInsect extends GameEvent {
+class SetNewInsect extends GamePvsPEvent {
   final Insect insect;
   final Position position;
 
   SetNewInsect(this.insect, this.position);
 }
 
-class ChangeInsectPosition extends GameEvent {
+class ChangeInsectPosition extends GamePvsPEvent {
   final Insect insect;
   final Position position;
 

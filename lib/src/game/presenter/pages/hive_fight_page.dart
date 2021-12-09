@@ -1,23 +1,27 @@
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:hexagon/hexagon.dart';
 import 'package:hive_game_client/core/widgets/animated_fade_in_fade_out/animated_fade_in_fade_out.dart';
+import 'package:hive_game_client/core/widgets/bottom_sheets/action_sheets/indicator_upper_bottom_sheet.dart';
 import 'package:hive_game_client/core/widgets/dedicated_app_bar/dedicated_app_bar.dart';
 import 'package:hive_game_client/core/widgets/dialogs/dialogs.dart';
-import 'package:hive_game_client/src/game/bloc/game_bloc.dart';
+
 import 'package:hive_game_client/src/game/models/insect/insect.dart';
 import 'package:hive_game_client/src/game/models/models.dart';
+import 'package:hive_game_client/src/game/state_management/player_vs_player_bloc/game_bloc.dart';
 
-class ArenaHivePage extends StatelessWidget {
+class ArenaPvsPPage extends StatelessWidget {
   final String playerOne;
   final String playerTwo;
 
-  static const routeName = '/';
-  const ArenaHivePage({
+  static const routeName = '/arena-hive/pvsp';
+
+  const ArenaPvsPPage({
     Key? key,
     required this.playerOne,
     required this.playerTwo,
@@ -25,8 +29,9 @@ class ArenaHivePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    log('arena PvsP with $playerOne vs $playerTwo');
     return BlocProvider(
-      create: (context) => GameBloc(
+      create: (context) => GamePvsPBloc(
         playerOne,
         playerTwo,
       ),
@@ -78,29 +83,94 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
     super.dispose();
   }
 
+  Future<void> showInsectData(Insect insect) => showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (context) => Container(
+          constraints: BoxConstraints(maxWidth: 360),
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.75,
+            decoration: BoxDecoration(
+              color: Theme.of(context).canvasColor,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(25.0),
+                topRight: Radius.circular(25.0),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  IndicatorUpperBottomSheet(
+                    padding: EdgeInsets.only(top: 12, bottom: 12),
+                    color: Theme.of(context).dividerColor,
+                  ),
+                  HexagonWidget(
+                    width: 100,
+                    type: HexagonType.FLAT,
+                    padding: 4.0,
+                    cornerRadius: 8.0,
+                    elevation: 8,
+                    color: Theme.of(context).dividerColor,
+                    child: Center(
+                      child: IgnorePointer(
+                        child: Image.asset(
+                          'assets/images/${insect.icon}.png',
+                          height: 60,
+                          // color: Theme.of(context).cardColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    insect.name,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headline4,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    'Aqui va un texto de descripcion de lo que hace la carta',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headline6,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<GameBloc, GameState>(
+    return BlocConsumer<GamePvsPBloc, GamePvsPState>(
       listener: (context, state) {
         // TODO: implement listener
       },
       builder: (context, state) {
         return Scaffold(
-          appBar: const DedicatedAppBar(),
-          backgroundColor: Theme.of(context).canvasColor,
+          appBar: DedicatedAppBar(
+            centerTitle: true,
+            title: Text('${widget.playerOne} vs ${widget.playerTwo}'),
+          ),
+          backgroundColor: Theme.of(context).backgroundColor,
           body: LayoutBuilder(builder: (context, constraint) {
             return Column(
               children: [
-                Container(
-                  height: 75,
+                SizedBox(
+                  height: MediaQuery.of(context).size.height / 10,
                   child: Stack(
                     children: [
                       AnimatedFadeInFadeOut(
                         shouldShow: () => state is! Player2Turn,
                         child: Builder(builder: (context) {
                           final _child = Container(
-                            color:
-                                Theme.of(context).canvasColor.withOpacity(0.85),
+                            color: Theme.of(context).backgroundColor,
                             child: Center(
                               child: Text(
                                 'Wait for your oponents move',
@@ -126,7 +196,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                         shouldShow: () => state is Player2Turn,
                         shouldShrink: false,
                         child: Container(
-                          height: 75,
+                          height: MediaQuery.of(context).size.height / 10,
                           color: Theme.of(context).backgroundColor,
                           child: ListView.builder(
                             physics: const BouncingScrollPhysics(
@@ -139,7 +209,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                             itemBuilder: (context, index) {
                               final _insect = state.player1Hand[index];
                               return HexagonWidget(
-                                width: 60,
+                                height: MediaQuery.of(context).size.height / 12,
                                 type: HexagonType.FLAT,
                                 padding: 4.0,
                                 cornerRadius: 8.0,
@@ -149,6 +219,10 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                   alignment: Alignment.center,
                                   children: [
                                     GestureDetector(
+                                      onLongPress: () =>
+                                          showInsectData(_insect),
+                                      onDoubleTap: () =>
+                                          showInsectData(_insect),
                                       onTap: () {
                                         if (selectedInsect == _insect) {
                                           setState(() {
@@ -164,10 +238,12 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                     ),
                                     Center(
                                       child: IgnorePointer(
-                                        child: Icon(
-                                          _insect.icon,
-                                          size: 24,
-                                          color: Theme.of(context).cardColor,
+                                        child: Image.asset(
+                                          'assets/images/${_insect.icon}.png',
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height /
+                                              24,
                                         ),
                                       ),
                                     ),
@@ -208,113 +284,138 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                               }
                             }
                           });
-                          return HexagonGrid.pointy(
-                            color: Theme.of(context).canvasColor,
-                            depth: 5,
-                            width: MediaQuery.of(context).size.height * 3,
-                            buildTile: (coordinates) {
-                              final _isPlayer1 = state.arena.player1Insects.any(
-                                  (element) =>
-                                      element.position?.x == coordinates.x &&
-                                      element.position?.y == coordinates.y);
-                              final _isPlayer2 = state.arena.player2Insects.any(
-                                  (element) =>
-                                      element.position?.x == coordinates.x &&
-                                      element.position?.y == coordinates.y);
-                              final Insect? _insect = _isPlayer1
-                                  ? state.arena.player1Insects.firstWhere(
-                                      (element) =>
-                                          element.position?.x ==
-                                              coordinates.x &&
-                                          element.position?.y == coordinates.y)
-                                  : _isPlayer2
-                                      ? state.arena.player2Insects.firstWhere(
-                                          (element) =>
-                                              element.position?.x ==
-                                                  coordinates.x &&
-                                              element.position?.y ==
-                                                  coordinates.y)
-                                      : null;
-                              final _isPossiblePositionForSelectInsect =
-                                  selectedInsect?.possiblePositions.any(
+                          return Padding(
+                            padding: const EdgeInsets.all(80.0),
+                            child: HexagonGrid.pointy(
+                              color: Theme.of(context).backgroundColor,
+                              depth: 5,
+                              width: MediaQuery.of(context).size.height * 3,
+                              buildTile: (coordinates) {
+                                final _isPlayer1 = state.arena.player1Insects
+                                    .any((element) =>
+                                        element.position?.x == coordinates.x &&
+                                        element.position?.y == coordinates.y);
+                                final _isPlayer2 = state.arena.player2Insects
+                                    .any((element) =>
+                                        element.position?.x == coordinates.x &&
+                                        element.position?.y == coordinates.y);
+                                final Insect? _insect = _isPlayer1
+                                    ? state.arena.player1Insects.firstWhere(
                                         (element) =>
-                                            element.x == coordinates.x &&
-                                            element.y == coordinates.y,
-                                      ) ??
-                                      false;
-                              final tileColor = _isPlayer1
-                                  ? Theme.of(context).colorScheme.secondary
-                                  : _isPlayer2
-                                      ? Theme.of(context).primaryColor
-                                      : Theme.of(context).cardColor;
-                              return HexagonWidgetBuilder(
-                                padding: 4.0,
-                                cornerRadius: 8.0,
-                                elevation: 8,
-                                color: _isPossiblePositionForSelectInsect
-                                    ? Theme.of(context).canvasColor
-                                    : tileColor,
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        if (selectedInsect != null) {
-                                          if (!(selectedInsect
-                                                  ?.possiblePositions
-                                                  .contains(Position(
-                                                      coordinates.x,
-                                                      coordinates.y)) ??
-                                              true)) {
-                                            showErrorDialog(
-                                                context: context,
-                                                title: 'Movimiento invalido',
-                                                description:
-                                                    'Este insecto no se puede mover a esta posicion');
-                                          } else {
-                                            context.read<GameBloc>().add(
-                                                SetNewInsect(
-                                                    selectedInsect!,
-                                                    Position(coordinates.x,
-                                                        coordinates.y)));
-                                          }
+                                            element.position?.x ==
+                                                coordinates.x &&
+                                            element.position?.y ==
+                                                coordinates.y)
+                                    : _isPlayer2
+                                        ? state.arena.player2Insects.firstWhere(
+                                            (element) =>
+                                                element.position?.x ==
+                                                    coordinates.x &&
+                                                element.position?.y ==
+                                                    coordinates.y)
+                                        : null;
+                                final _isPossiblePositionForSelectInsect =
+                                    selectedInsect?.possiblePositions.any(
+                                          (element) =>
+                                              element.x == coordinates.x &&
+                                              element.y == coordinates.y,
+                                        ) ??
+                                        false;
+                                final tileColor = _isPlayer1
+                                    ? Theme.of(context).colorScheme.secondary
+                                    : _isPlayer2
+                                        ? Theme.of(context).primaryColor
+                                        : Theme.of(context).cardColor;
+                                return HexagonWidgetBuilder(
+                                  padding: 4.0,
+                                  cornerRadius: 8.0,
+                                  elevation: 8,
+                                  color: _isPossiblePositionForSelectInsect
+                                      ? CupertinoColors.systemGrey
+                                      : tileColor,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      GestureDetector(
+                                        onLongPress: () => _insect != null
+                                            ? showInsectData(_insect)
+                                            : null,
+                                        onDoubleTap: () => _insect != null
+                                            ? showInsectData(_insect)
+                                            : null,
+                                        onTap: () {
+                                          if (selectedInsect != null) {
+                                            if (!(selectedInsect
+                                                    ?.possiblePositions
+                                                    .contains(Position(
+                                                        coordinates.x,
+                                                        coordinates.y)) ??
+                                                true)) {
+                                              showErrorDialog(
+                                                  context: context,
+                                                  title: 'Movimiento invalido',
+                                                  description:
+                                                      'Este insecto no se puede mover a esta posicion');
+                                            } else {
+                                              context.read<GamePvsPBloc>().add(
+                                                  SetNewInsect(
+                                                      selectedInsect!,
+                                                      Position(coordinates.x,
+                                                          coordinates.y)));
+                                            }
 
-                                          setState(() {
-                                            selectedInsect = null;
-                                            log('Selected insect is now $_insect');
-                                          });
-                                        } else {
-                                          setState(() {
-                                            selectedInsect = _insect;
-                                            log('Selected insect is now $_insect');
-                                          });
-                                        }
-                                      },
-                                    ),
-                                    IgnorePointer(
-                                      child: LayoutBuilder(
-                                        builder: (context, constraints) {
-                                          return (_insect != null)
-                                              ? Icon(
-                                                  _insect.icon,
-                                                  size:
-                                                      constraint.maxHeight / 10,
-                                                  color: Theme.of(context)
-                                                      .cardColor,
-                                                )
-                                              : Text(
-                                                  '(${coordinates.x},${coordinates.y})',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .headline4,
-                                                );
+                                            setState(() {
+                                              selectedInsect = null;
+                                              log('Selected insect is now $_insect');
+                                            });
+                                          } else {
+                                            setState(() {
+                                              selectedInsect = _insect;
+                                              log('Selected insect is now $_insect');
+                                            });
+                                          }
                                         },
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+                                      IgnorePointer(
+                                        child: LayoutBuilder(
+                                          builder: (context, constraints) {
+                                            return (_insect != null)
+                                                ? Container(
+                                                    constraints: constraint,
+                                                    child: Image.asset(
+                                                      'assets/images/${_insect.icon}.png',
+                                                      height:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .height /
+                                                              7,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  )
+                                                : _isPossiblePositionForSelectInsect
+                                                    ? Container(
+                                                        constraints: constraint,
+                                                        child: Image.asset(
+                                                          'assets/images/${selectedInsect!.icon}.png',
+                                                          height: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .height /
+                                                              7,
+                                                          fit: BoxFit.cover,
+                                                          color: CupertinoColors
+                                                              .systemGrey4,
+                                                        ),
+                                                      )
+                                                    : const SizedBox.shrink();
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
                           );
                         },
                       ),
@@ -322,7 +423,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                   ),
                 ),
                 Container(
-                  height: 75,
+                  height: MediaQuery.of(context).size.height / 10,
                   color: Theme.of(context).backgroundColor,
                   child: Stack(
                     children: [
@@ -331,8 +432,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                         shouldShrink: false,
                         child: Builder(builder: (context) {
                           final _child = Container(
-                            color:
-                                Theme.of(context).canvasColor.withOpacity(0.85),
+                            color: Theme.of(context).backgroundColor,
                             child: Center(
                               child: Text(
                                 'Wait for your oponents move',
@@ -370,7 +470,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                           itemBuilder: (context, index) {
                             final _insect = state.player2Hand[index];
                             return HexagonWidget(
-                              width: 60,
+                              width: MediaQuery.of(context).size.height / 12,
                               type: HexagonType.FLAT,
                               padding: 4.0,
                               cornerRadius: 8.0,
@@ -380,6 +480,8 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                 alignment: Alignment.center,
                                 children: [
                                   GestureDetector(
+                                    onLongPress: () => showInsectData(_insect),
+                                    onDoubleTap: () => showInsectData(_insect),
                                     onTap: () {
                                       if (selectedInsect == _insect) {
                                         setState(() {
@@ -395,10 +497,12 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                   ),
                                   Center(
                                     child: IgnorePointer(
-                                      child: FaIcon(
-                                        _insect.icon,
-                                        size: 24,
-                                        color: Theme.of(context).cardColor,
+                                      child: Image.asset(
+                                        'assets/images/${_insect.icon}.png',
+                                        height:
+                                            MediaQuery.of(context).size.height /
+                                                24,
+                                        // color: Theme.of(context).cardColor,
                                       ),
                                     ),
                                   ),
