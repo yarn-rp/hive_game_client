@@ -29,12 +29,12 @@ class Player {
   @JsonKey(name: 'name')
   final String name;
 
-  @JsonKey(name: 'number_of_moves')
+  @JsonKey(name: 'movesCount')
   final num numberOfMoves;
 
-  @JsonKey(name: 'queen_bee_placed')
+  @JsonKey(name: 'hasQueenOnArena')
   final bool queenBeePlaced;
 
-  @JsonKey(name: 'type_player')
+  @JsonKey(name: 'type')
   final String typePlayer;
 }

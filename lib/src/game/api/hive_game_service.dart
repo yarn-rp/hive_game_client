@@ -7,10 +7,10 @@ abstract class HiveGameService extends ChopperService {
   static HiveGameService create([ChopperClient? client]) =>
       _$HiveGameService(client);
 
-  @Get(path: '/hive_api/game/game_stats')
+  @Get(path: '/game/arena')
   Future<Response<Map<String, dynamic>>> getCurrentArena();
 
-  @Post(path: '/hive_api/game/new_game')
+  @Post(path: '/game')
   Future<Response<Map<String, dynamic>>> startNewGame(
     @Field('mode') String mode,
     @Field('level') int level,
@@ -21,18 +21,18 @@ abstract class HiveGameService extends ChopperService {
     @Field('arenaId') String arenaId,
   );
 
-  @Post(path: '/hive_api/insect/get_possible_placements')
+  @Post(path: '/insect/place/available')
   Future<Response<Map<String, dynamic>>> getPossiblePlacements(
     @Field('type') String type,
   );
-  @Post(path: '/hive_api/insect/get_possible_moves')
+  @Post(path: '/insect/move/available')
   Future<Response<Map<String, dynamic>>> getPossibleMoves(
     @Field('type') String type,
     @Field('id') int id,
     @Field('hexagon') List<int> hexagon,
   );
 
-  @Post(path: '/hive_api/insect/move_insect')
+  @Post(path: '/insect/move')
   Future<Response<Map<String, dynamic>>> movePiece(
     @Field() String type,
     @Field() int id,
@@ -41,11 +41,11 @@ abstract class HiveGameService extends ChopperService {
     @Field('hexagon_end') List destiny,
   );
 
-  @Post(path: '/hive_api/insect/place_insect')
+  @Post(path: '/insect/place')
   Future<Response<Map<String, dynamic>>> placeInsect(
     @Field() String type,
     @Field('hexagon') List newPlace,
   );
-  @Get(path: '/hive_api/ai/play')
+  @Get(path: '/ai')
   Future<Response<Map<String, dynamic>>> playAI();
 }

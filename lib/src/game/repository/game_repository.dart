@@ -33,26 +33,20 @@ class GameRepository {
         final _p1 = Player(
           p1Info['id'],
           p1Info['name'],
-          p1Info['number_of_moves'],
-          p1Info['game_over'],
-          p1Info['queen_bee_placed'],
-          p1Info['type_player'],
-          [
-            ...(p1Info['non_placed_insects'] as List)
-                .map((e) => Insect.fromJson(e))
-          ],
+          p1Info['movesCount'],
+          p1Info['isGameOver'],
+          p1Info['hasQueenOnArena'],
+          p1Info['type'],
+          [...(p1Info['hand'] as List).map((e) => Insect.fromJson(e))],
         );
         final _p2 = Player(
           p2Info['id'],
           p2Info['name'],
-          p2Info['number_of_moves'],
-          p2Info['game_over'],
-          p2Info['queen_bee_placed'],
-          p2Info['type_player'],
-          [
-            ...(p2Info['non_placed_insects'] as List)
-                .map((e) => Insect.fromJson(e))
-          ],
+          p2Info['movesCount'],
+          p2Info['isGameOver'],
+          p2Info['hasQueenOnArena'],
+          p2Info['type'],
+          [...(p2Info['hand'] as List).map((e) => Insect.fromJson(e))],
         );
         log('Player 1 insects is: ${_p1.insects}');
         log('Player 2 insects is: ${_p2.insects}');
@@ -246,26 +240,20 @@ class GameRepository {
         final _p1 = Player(
           p1Info['id'],
           p1Info['name'],
-          p1Info['number_of_moves'],
-          p1Info['game_over'],
-          p1Info['queen_bee_placed'],
-          p1Info['type_player'],
-          [
-            ...(p1Info['non_placed_insects'] as List)
-                .map((e) => Insect.fromJson(e))
-          ],
+          p1Info['movesCount'],
+          p1Info['isGameOver'],
+          p1Info['hasQueenOnArena'],
+          p1Info['type'],
+          [...(p1Info['hand'] as List).map((e) => Insect.fromJson(e))],
         );
         final _p2 = Player(
           p2Info['id'],
           p2Info['name'],
-          p2Info['number_of_moves'],
-          p2Info['game_over'],
-          p2Info['queen_bee_placed'],
-          p2Info['type_player'],
-          [
-            ...(p2Info['non_placed_insects'] as List)
-                .map((e) => Insect.fromJson(e))
-          ],
+          p2Info['movesCount'],
+          p2Info['isGameOver'],
+          p2Info['hasQueenOnArena'],
+          p2Info['type'],
+          [...(p2Info['hand'] as List).map((e) => Insect.fromJson(e))],
         );
         log('Player 1 insects is: ${_p1.insects}');
         log('Player 2 insects is: ${_p2.insects}');

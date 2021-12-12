@@ -18,14 +18,14 @@ class _$HiveGameService extends HiveGameService {
 
   @override
   Future<Response<Map<String, dynamic>>> getCurrentArena() {
-    final $url = '/hive_api/game/game_stats';
+    final $url = '/game/arena';
     final $request = Request('GET', $url, client.baseUrl);
     return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
   }
 
   @override
   Future<Response<Map<String, dynamic>>> startNewGame(String mode, int level) {
-    final $url = '/hive_api/game/new_game';
+    final $url = '/game';
     final $body = <String, dynamic>{'mode': mode, 'level': level};
     final $request = Request('POST', $url, client.baseUrl, body: $body);
     return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
@@ -41,7 +41,7 @@ class _$HiveGameService extends HiveGameService {
 
   @override
   Future<Response<Map<String, dynamic>>> getPossiblePlacements(String type) {
-    final $url = '/hive_api/insect/get_possible_placements';
+    final $url = '/insect/place/available';
     final $body = <String, dynamic>{'type': type};
     final $request = Request('POST', $url, client.baseUrl, body: $body);
     return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
@@ -50,7 +50,7 @@ class _$HiveGameService extends HiveGameService {
   @override
   Future<Response<Map<String, dynamic>>> getPossibleMoves(
       String type, int id, List<int> hexagon) {
-    final $url = '/hive_api/insect/get_possible_moves';
+    final $url = '/insect/move/available';
     final $body = <String, dynamic>{'type': type, 'id': id, 'hexagon': hexagon};
     final $request = Request('POST', $url, client.baseUrl, body: $body);
     return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
@@ -59,7 +59,7 @@ class _$HiveGameService extends HiveGameService {
   @override
   Future<Response<Map<String, dynamic>>> movePiece(String type, int id, int lvl,
       List<dynamic> origin, List<dynamic> destiny) {
-    final $url = '/hive_api/insect/move_insect';
+    final $url = '/insect/move';
     final $body = <String, dynamic>{
       'type': type,
       'id': id,
@@ -74,7 +74,7 @@ class _$HiveGameService extends HiveGameService {
   @override
   Future<Response<Map<String, dynamic>>> placeInsect(
       String type, List<dynamic> newPlace) {
-    final $url = '/hive_api/insect/place_insect';
+    final $url = '/insect/place';
     final $body = <String, dynamic>{'type': type, 'hexagon': newPlace};
     final $request = Request('POST', $url, client.baseUrl, body: $body);
     return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
@@ -82,7 +82,7 @@ class _$HiveGameService extends HiveGameService {
 
   @override
   Future<Response<Map<String, dynamic>>> playAI() {
-    final $url = '/hive_api/ai/play';
+    final $url = '/ai';
     final $request = Request('GET', $url, client.baseUrl);
     return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
   }

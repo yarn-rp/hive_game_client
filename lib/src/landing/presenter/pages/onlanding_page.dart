@@ -363,19 +363,6 @@ class OnlandingPage extends StatelessWidget {
                             ),
                       ),
                     ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    RoundedDedicatedSimpleButton(
-                      color: Theme.of(context).textTheme.bodyText1?.color,
-                      child: Text(
-                        'Readme',
-                        style: Theme.of(context).textTheme.headline5?.copyWith(
-                              color:
-                                  Theme.of(context).textTheme.headline5?.color,
-                            ),
-                      ),
-                    ),
                   ],
                 ),
               ),
