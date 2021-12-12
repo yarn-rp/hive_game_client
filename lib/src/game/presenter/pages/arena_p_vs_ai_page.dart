@@ -7,63 +7,56 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:hexagon/hexagon.dart';
 import 'package:hive_game_client/core/widgets/animated_fade_in_fade_out/animated_fade_in_fade_out.dart';
-import 'package:hive_game_client/core/widgets/bottom_sheets/action_sheets/indicator_upper_bottom_sheet.dart';
+
 import 'package:hive_game_client/core/widgets/dedicated_app_bar/dedicated_app_bar.dart';
 import 'package:hive_game_client/core/widgets/dialogs/dialogs.dart';
 
 import 'package:hive_game_client/src/game/models/insect/insect.dart';
 import 'package:hive_game_client/src/game/models/models.dart';
-import 'package:hive_game_client/src/game/state_management/player_vs_player_bloc/game_bloc.dart';
+import 'package:hive_game_client/src/game/presenter/widgets/show_insect_data.dart';
+import 'package:hive_game_client/src/game/state_management/player_vs_ai/game_p_vs_ai_bloc.dart';
 
-class ArenaPvsPPage extends StatelessWidget {
+class ArenaPvsAiPage extends StatelessWidget {
   final String playerOne;
-  final String playerTwo;
 
-  static const routeName = '/arena-hive/pvsp';
+  static const routeName = '/arena-hive/p-vs-ai';
 
-  const ArenaPvsPPage({
+  const ArenaPvsAiPage({
     Key? key,
     required this.playerOne,
-    required this.playerTwo,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    log('arena PvsP with $playerOne vs $playerTwo');
     return BlocProvider(
-      create: (context) => GamePvsPBloc(
+      create: (context) => GamePVsAiBloc(
         playerOne,
-        playerTwo,
       ),
-      child: ArenaHiveView(
+      child: ArenaPvsAiView(
         playerOne: playerOne,
-        playerTwo: playerTwo,
       ),
     );
   }
 }
 
-class ArenaHiveView extends StatefulWidget {
+class ArenaPvsAiView extends StatefulWidget {
   final String playerOne;
-  final String playerTwo;
 
-  const ArenaHiveView({
+  const ArenaPvsAiView({
     Key? key,
     required this.playerOne,
-    required this.playerTwo,
   }) : super(key: key);
 
   @override
-  State<ArenaHiveView> createState() => _ArenaHiveViewState();
+  State<ArenaPvsAiView> createState() => ArenaPvsAiViewState();
 }
 
-class _ArenaHiveViewState extends State<ArenaHiveView> {
+class ArenaPvsAiViewState extends State<ArenaPvsAiView> {
   late TransformationController _transformationController;
   Insect? selectedInsect;
   bool loaded = false;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _transformationController =
         TransformationController(Matrix4.identity() * 0.1);
@@ -83,72 +76,9 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
     super.dispose();
   }
 
-  Future<void> showInsectData(Insect insect) => showModalBottomSheet(
-        context: context,
-        backgroundColor: Colors.transparent,
-        builder: (context) => Container(
-          constraints: BoxConstraints(maxWidth: 360),
-          child: Container(
-            height: MediaQuery.of(context).size.height * 0.75,
-            decoration: BoxDecoration(
-              color: Theme.of(context).canvasColor,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(25.0),
-                topRight: Radius.circular(25.0),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  IndicatorUpperBottomSheet(
-                    padding: EdgeInsets.only(top: 12, bottom: 12),
-                    color: Theme.of(context).dividerColor,
-                  ),
-                  HexagonWidget(
-                    width: 100,
-                    type: HexagonType.FLAT,
-                    padding: 4.0,
-                    cornerRadius: 8.0,
-                    elevation: 8,
-                    color: Theme.of(context).dividerColor,
-                    child: Center(
-                      child: IgnorePointer(
-                        child: Image.asset(
-                          'assets/images/${insect.icon}.png',
-                          height: 60,
-                          // color: Theme.of(context).cardColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    insect.name,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headline4,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    'Aqui va un texto de descripcion de lo que hace la carta',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headline6,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<GamePvsPBloc, GamePvsPState>(
+    return BlocConsumer<GamePVsAiBloc, GamePVsAiState>(
       listener: (context, state) {
         // TODO: implement listener
       },
@@ -156,7 +86,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
         return Scaffold(
           appBar: DedicatedAppBar(
             centerTitle: true,
-            title: Text('${widget.playerOne} vs ${widget.playerTwo}'),
+            title: Text('${widget.playerOne} vs HIVE-AI'),
           ),
           backgroundColor: Theme.of(context).backgroundColor,
           body: LayoutBuilder(builder: (context, constraint) {
@@ -167,23 +97,26 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                   child: Stack(
                     children: [
                       AnimatedFadeInFadeOut(
-                        shouldShow: () => state is! Player2Turn,
+                        shouldShow: () => state is! AiTurn,
                         child: Builder(builder: (context) {
                           final _child = Container(
                             color: Theme.of(context).backgroundColor,
                             child: Center(
-                              child: Text(
-                                'Wait for your oponents move',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headline5
-                                    ?.copyWith(
-                                      color: Theme.of(context).primaryColor,
+                              child: state is Loading
+                                  ? SizedBox()
+                                  : Text(
+                                      'Wait for your oponents move',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headline5
+                                          ?.copyWith(
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                          ),
                                     ),
-                              ),
                             ),
                           );
-                          if (state is Player2Turn) {
+                          if (state is AiTurn) {
                             return _child;
                           } else {
                             return IgnorePointer(
@@ -193,7 +126,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                         }),
                       ),
                       AnimatedFadeInFadeOut(
-                        shouldShow: () => state is Player2Turn,
+                        shouldShow: () => state is AiTurn,
                         shouldShrink: false,
                         child: Container(
                           height: MediaQuery.of(context).size.height / 10,
@@ -205,9 +138,9 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                             scrollDirection: Axis.horizontal,
                             padding: const EdgeInsets.symmetric(
                                 vertical: 5, horizontal: 10),
-                            itemCount: state.player1Hand.length,
+                            itemCount: state.aiHand.length,
                             itemBuilder: (context, index) {
-                              final _insect = state.player1Hand[index];
+                              final _insect = state.aiHand[index];
                               return HexagonWidget(
                                 height: MediaQuery.of(context).size.height / 12,
                                 type: HexagonType.FLAT,
@@ -218,28 +151,10 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                 child: Stack(
                                   alignment: Alignment.center,
                                   children: [
-                                    GestureDetector(
-                                      onLongPress: () =>
-                                          showInsectData(_insect),
-                                      onDoubleTap: () =>
-                                          showInsectData(_insect),
-                                      onTap: () {
-                                        if (selectedInsect == _insect) {
-                                          setState(() {
-                                            selectedInsect = null;
-                                          });
-                                        } else {
-                                          setState(() {
-                                            selectedInsect = _insect;
-                                            log('Selected insect is now $_insect');
-                                          });
-                                        }
-                                      },
-                                    ),
                                     Center(
                                       child: IgnorePointer(
                                         child: Image.asset(
-                                          'assets/images/${_insect.icon}.png',
+                                          'assets/images/${_insect.type}.png',
                                           height: MediaQuery.of(context)
                                                   .size
                                                   .height /
@@ -291,36 +206,31 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                               depth: 5,
                               width: MediaQuery.of(context).size.height * 3,
                               buildTile: (coordinates) {
-                                final _isPlayer1 = state.arena.player1Insects
+                                final _isPlayer1 = state.arena.player1.insects
                                     .any((element) =>
                                         element.position?.x == coordinates.x &&
                                         element.position?.y == coordinates.y);
-                                final _isPlayer2 = state.arena.player2Insects
+                                final _isPlayer2 = state.arena.player2.insects
                                     .any((element) =>
                                         element.position?.x == coordinates.x &&
                                         element.position?.y == coordinates.y);
                                 final Insect? _insect = _isPlayer1
-                                    ? state.arena.player1Insects.firstWhere(
+                                    ? state.arena.player1.insects.firstWhere(
                                         (element) =>
                                             element.position?.x ==
                                                 coordinates.x &&
                                             element.position?.y ==
                                                 coordinates.y)
                                     : _isPlayer2
-                                        ? state.arena.player2Insects.firstWhere(
-                                            (element) =>
+                                        ? state.arena.player2.insects
+                                            .firstWhere((element) =>
                                                 element.position?.x ==
                                                     coordinates.x &&
                                                 element.position?.y ==
                                                     coordinates.y)
                                         : null;
                                 final _isPossiblePositionForSelectInsect =
-                                    selectedInsect?.possiblePositions.any(
-                                          (element) =>
-                                              element.x == coordinates.x &&
-                                              element.y == coordinates.y,
-                                        ) ??
-                                        false;
+                                    false;
                                 final tileColor = _isPlayer1
                                     ? Theme.of(context).colorScheme.secondary
                                     : _isPlayer2
@@ -338,26 +248,21 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                     children: [
                                       GestureDetector(
                                         onLongPress: () => _insect != null
-                                            ? showInsectData(_insect)
+                                            ? showInsectData(context, _insect)
                                             : null,
                                         onDoubleTap: () => _insect != null
-                                            ? showInsectData(_insect)
+                                            ? showInsectData(context, _insect)
                                             : null,
                                         onTap: () {
                                           if (selectedInsect != null) {
-                                            if (!(selectedInsect
-                                                    ?.possiblePositions
-                                                    .contains(Position(
-                                                        coordinates.x,
-                                                        coordinates.y)) ??
-                                                true)) {
+                                            if (!(true)) {
                                               showErrorDialog(
                                                   context: context,
                                                   title: 'Movimiento invalido',
                                                   description:
                                                       'Este insecto no se puede mover a esta posicion');
                                             } else {
-                                              context.read<GamePvsPBloc>().add(
+                                              context.read<GamePVsAiBloc>().add(
                                                   SetNewInsect(
                                                       selectedInsect!,
                                                       Position(coordinates.x,
@@ -383,7 +288,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                                 ? Container(
                                                     constraints: constraint,
                                                     child: Image.asset(
-                                                      'assets/images/${_insect.icon}.png',
+                                                      'assets/images/${_insect.type}.png',
                                                       height:
                                                           MediaQuery.of(context)
                                                                   .size
@@ -396,7 +301,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                                     ? Container(
                                                         constraints: constraint,
                                                         child: Image.asset(
-                                                          'assets/images/${selectedInsect!.icon}.png',
+                                                          'assets/images/${selectedInsect!.type}.png',
                                                           height: MediaQuery.of(
                                                                       context)
                                                                   .size
@@ -428,7 +333,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                   child: Stack(
                     children: [
                       AnimatedFadeInFadeOut(
-                        shouldShow: () => state is! Player1Turn,
+                        shouldShow: () => state is! MyTurn,
                         shouldShrink: false,
                         child: Builder(builder: (context) {
                           final _child = Container(
@@ -447,7 +352,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                               ),
                             ),
                           );
-                          if (state is Player1Turn) {
+                          if (state is MyTurn) {
                             return _child;
                           } else {
                             return IgnorePointer(
@@ -457,7 +362,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                         }),
                       ),
                       AnimatedFadeInFadeOut(
-                        shouldShow: () => state is Player1Turn,
+                        shouldShow: () => state is MyTurn,
                         shouldShrink: false,
                         child: ListView.builder(
                           physics: const BouncingScrollPhysics(
@@ -466,9 +371,9 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.symmetric(
                               vertical: 5, horizontal: 10),
-                          itemCount: state.player2Hand.length,
+                          itemCount: state.myHand.length,
                           itemBuilder: (context, index) {
-                            final _insect = state.player2Hand[index];
+                            final _insect = state.myHand[index];
                             return HexagonWidget(
                               width: MediaQuery.of(context).size.height / 12,
                               type: HexagonType.FLAT,
@@ -480,8 +385,10 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                 alignment: Alignment.center,
                                 children: [
                                   GestureDetector(
-                                    onLongPress: () => showInsectData(_insect),
-                                    onDoubleTap: () => showInsectData(_insect),
+                                    onLongPress: () =>
+                                        showInsectData(context, _insect),
+                                    onDoubleTap: () =>
+                                        showInsectData(context, _insect),
                                     onTap: () {
                                       if (selectedInsect == _insect) {
                                         setState(() {
@@ -498,7 +405,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                   Center(
                                     child: IgnorePointer(
                                       child: Image.asset(
-                                        'assets/images/${_insect.icon}.png',
+                                        'assets/images/${_insect.type}.png',
                                         height:
                                             MediaQuery.of(context).size.height /
                                                 24,

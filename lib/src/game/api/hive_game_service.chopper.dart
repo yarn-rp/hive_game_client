@@ -17,43 +17,66 @@ class _$HiveGameService extends HiveGameService {
   final definitionType = HiveGameService;
 
   @override
-  Future<Response<Either<Failure, Arena>>> getCurrentArena(String arenaId) {
-    final $url = '/getArena';
-    final $params = <String, dynamic>{'arenaId': arenaId};
-    final $request = Request('GET', $url, client.baseUrl, parameters: $params);
-    return client.send<Either<Failure, Arena>, Failure>($request,
-        responseConverter: HiveGameConverter.convertResponseArena);
+  Future<Response<Map<String, dynamic>>> getCurrentArena() {
+    final $url = '/hive_api/game/game_stats';
+    final $request = Request('GET', $url, client.baseUrl);
+    return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
   }
 
   @override
-  Future<Response<Either<Failure, Arena>>> startNewGame(
-      String playerId1, String playerId2) {
-    final $url = '/newGame';
-    final $body = <String, dynamic>{
-      'playerId1': playerId1,
-      'playerId2': playerId2
-    };
+  Future<Response<Map<String, dynamic>>> startNewGame(String mode, int level) {
+    final $url = '/hive_api/game/new_game';
+    final $body = <String, dynamic>{'mode': mode, 'level': level};
     final $request = Request('POST', $url, client.baseUrl, body: $body);
-    return client.send<Either<Failure, Arena>, Failure>($request);
+    return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
   }
 
   @override
-  Future<Response<Either<Failure, Arena>>> quitGame(String arenaId) {
-    final $url = '/quitGame';
+  Future<Response<Map<String, dynamic>>> quitGame(String arenaId) {
+    final $url = 'game/quitGame';
     final $body = <String, dynamic>{'arenaId': arenaId};
     final $request = Request('POST', $url, client.baseUrl, body: $body);
-    return client.send<Either<Failure, Arena>, Failure>($request);
+    return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
   }
 
   @override
-  Future<Response<Either<Failure, Arena>>> movePiece(
-      Map<String, dynamic> insect, Map<String, dynamic> coordinates) {
-    final $url = '/movePiece';
+  Future<Response<Map<String, dynamic>>> getPossiblePlacements(String type) {
+    final $url = '/hive_api/insect/get_possible_placements';
+    final $body = <String, dynamic>{'type': type};
+    final $request = Request('POST', $url, client.baseUrl, body: $body);
+    return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
+  }
+
+  @override
+  Future<Response<Map<String, dynamic>>> getPossibleMoves(
+      String type, int id, List<int> hexagon) {
+    final $url = '/hive_api/insect/get_possible_moves';
+    final $body = <String, dynamic>{'type': type, 'id': id, 'hexagon': hexagon};
+    final $request = Request('POST', $url, client.baseUrl, body: $body);
+    return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
+  }
+
+  @override
+  Future<Response<Map<String, dynamic>>> movePiece(String type, int id, int lvl,
+      List<dynamic> origin, List<dynamic> destiny) {
+    final $url = '/hive_api/insect/move_insect';
     final $body = <String, dynamic>{
-      'insect': insect,
-      'newCoordinates': coordinates
+      'type': type,
+      'id': id,
+      'lvl': lvl,
+      'hexagon_ori': origin,
+      'hexagon_end': destiny
     };
     final $request = Request('POST', $url, client.baseUrl, body: $body);
-    return client.send<Either<Failure, Arena>, Failure>($request);
+    return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
+  }
+
+  @override
+  Future<Response<Map<String, dynamic>>> placeInsect(
+      String type, List<dynamic> newPlace) {
+    final $url = '/hive_api/insect/place_insect';
+    final $body = <String, dynamic>{'type': type, 'hexagon': newPlace};
+    final $request = Request('POST', $url, client.baseUrl, body: $body);
+    return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
   }
 }

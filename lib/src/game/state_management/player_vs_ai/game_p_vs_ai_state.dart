@@ -23,8 +23,17 @@ class GameInitial extends GamePVsAiState {
   }) : super(arena, name, myHand, aiHand);
 }
 
-class YourTurn extends GamePVsAiState {
-  YourTurn({
+class Loading extends GamePVsAiState {
+  Loading({
+    required Arena arena,
+    required String name,
+    required List<Insect> myHand,
+    required List<Insect> aiHand,
+  }) : super(arena, name, myHand, aiHand);
+}
+
+class MyTurn extends GamePVsAiState {
+  MyTurn({
     required Arena arena,
     required String name,
     required List<Insect> myHand,

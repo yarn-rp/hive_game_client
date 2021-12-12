@@ -1,30 +1,37 @@
-import 'package:hive_game_client/src/game/models/insect/insect.dart';
-
 import 'package:json_annotation/json_annotation.dart';
+
+import 'package:hive_game_client/src/game/models/insect/insect.dart';
+import 'package:hive_game_client/src/game/models/player/player.dart';
+
 part 'arena.g.dart';
 
 @JsonSerializable()
 class Arena {
-  final List<Insect> player1Insects;
-  final List<Insect> player2Insects;
+  final Player player1;
+  final Player player2;
   final String currentPlayerId;
+  final List<Insect> insects;
 
   Arena({
-    required this.player1Insects,
     required this.currentPlayerId,
-    required this.player2Insects,
+    required this.player1,
+    required this.player2,
+    required this.insects,
   });
 
   factory Arena.fromJson(Map<String, dynamic> json) => _$ArenaFromJson(json);
 
   Arena copyWith({
-    List<Insect>? player1Insects,
-    List<Insect>? player2Insects,
+    Player? player1,
+    Player? player2,
     String? currentPlayerId,
-  }) =>
-      Arena(
-        player1Insects: player1Insects ?? this.player1Insects,
-        currentPlayerId: currentPlayerId ?? this.currentPlayerId,
-        player2Insects: player2Insects ?? this.player2Insects,
-      );
+    List<Insect>? insects,
+  }) {
+    return Arena(
+      player1: player1 ?? this.player1,
+      player2: player2 ?? this.player2,
+      currentPlayerId: currentPlayerId ?? this.currentPlayerId,
+      insects: insects ?? this.insects,
+    );
+  }
 }

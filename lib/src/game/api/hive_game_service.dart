@@ -1,8 +1,4 @@
 import 'package:chopper/chopper.dart';
-import 'package:fpdart/fpdart.dart';
-import 'package:hive_game_client/core/error/failures.dart';
-import 'package:hive_game_client/src/game/api/converters/hive_game_converter.dart';
-import 'package:hive_game_client/src/game/models/models.dart';
 
 part 'hive_game_service.chopper.dart';
 
@@ -11,28 +7,43 @@ abstract class HiveGameService extends ChopperService {
   static HiveGameService create([ChopperClient? client]) =>
       _$HiveGameService(client);
 
-  @FactoryConverter(
-    response: HiveGameConverter.convertResponseArena,
-  )
-  @Get(path: '/getArena')
-  Future<Response<Either<Failure, Arena>>> getCurrentArena(
-    @Query('arenaId') String arenaId,
+  @Get(path: '/hive_api/game/game_stats')
+  Future<Response<Map<String, dynamic>>> getCurrentArena();
+
+  @Post(path: '/hive_api/game/new_game')
+  Future<Response<Map<String, dynamic>>> startNewGame(
+    @Field('mode') String mode,
+    @Field('level') int level,
   );
 
-  @Post(path: '/newGame')
-  Future<Response<Either<Failure, Arena>>> startNewGame(
-    @Field('playerId1') String playerId1,
-    @Field('playerId2') String playerId2,
-  );
-
-  @Post(path: '/quitGame')
-  Future<Response<Either<Failure, Arena>>> quitGame(
+  @Post(path: 'game/quitGame')
+  Future<Response<Map<String, dynamic>>> quitGame(
     @Field('arenaId') String arenaId,
   );
 
-  @Post(path: '/movePiece')
-  Future<Response<Either<Failure, Arena>>> movePiece(
-    @Field('insect') Map<String, dynamic> insect,
-    @Field('newCoordinates') Map<String, dynamic> coordinates,
+  @Post(path: '/hive_api/insect/get_possible_placements')
+  Future<Response<Map<String, dynamic>>> getPossiblePlacements(
+    @Field('type') String type,
+  );
+  @Post(path: '/hive_api/insect/get_possible_moves')
+  Future<Response<Map<String, dynamic>>> getPossibleMoves(
+    @Field('type') String type,
+    @Field('id') int id,
+    @Field('hexagon') List<int> hexagon,
+  );
+
+  @Post(path: '/hive_api/insect/move_insect')
+  Future<Response<Map<String, dynamic>>> movePiece(
+    @Field() String type,
+    @Field() int id,
+    @Field() int lvl,
+    @Field('hexagon_ori') List origin,
+    @Field('hexagon_end') List destiny,
+  );
+
+  @Post(path: '/hive_api/insect/place_insect')
+  Future<Response<Map<String, dynamic>>> placeInsect(
+    @Field() String type,
+    @Field('hexagon') List newPlace,
   );
 }

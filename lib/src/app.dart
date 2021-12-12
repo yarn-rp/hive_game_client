@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_game_client/core/theme/dark_theme.dart';
 import 'package:hive_game_client/core/theme/light_theme.dart';
+import 'package:hive_game_client/src/game/presenter/pages/arena_p_vs_ai_page.dart';
 import 'package:hive_game_client/src/landing/presenter/pages/onlanding_page.dart';
 
-import 'game/presenter/pages/hive_fight_page.dart';
+import 'game/presenter/pages/arena_p_vs_p_page.dart';
 
 /// The Widget that configures your application.
 class MyApp extends StatelessWidget {
@@ -62,6 +63,11 @@ class MyApp extends StatelessWidget {
                 return ArenaPvsPPage(
                   playerOne: (routeSettings.arguments as Map)['playerOne'],
                   playerTwo: (routeSettings.arguments as Map)['playerTwo'],
+                );
+
+              case ArenaPvsAiPage.routeName:
+                return ArenaPvsAiPage(
+                  playerOne: (routeSettings.arguments as Map)['playerOne'],
                 );
 
               default:
