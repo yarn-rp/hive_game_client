@@ -7,13 +7,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:hexagon/hexagon.dart';
 import 'package:hive_game_client/core/widgets/animated_fade_in_fade_out/animated_fade_in_fade_out.dart';
-
+import 'package:hive_game_client/core/widgets/bottom_sheets/action_sheets/indicator_upper_bottom_sheet.dart';
 import 'package:hive_game_client/core/widgets/dedicated_app_bar/dedicated_app_bar.dart';
 import 'package:hive_game_client/core/widgets/dialogs/dialogs.dart';
+import 'package:hive_game_client/main.dart';
 
 import 'package:hive_game_client/src/game/models/insect/insect.dart';
 import 'package:hive_game_client/src/game/models/models.dart';
 import 'package:hive_game_client/src/game/presenter/widgets/show_insect_data.dart';
+import 'package:hive_game_client/src/game/presenter/widgets_ai/empty_tile.dart';
+import 'package:hive_game_client/src/game/presenter/widgets_ai/player_1_tile.dart';
+import 'package:hive_game_client/src/game/presenter/widgets_ai/player_2_tile.dart';
+import 'package:hive_game_client/src/game/presenter/widgets_ai/possible_play_tile.dart';
 import 'package:hive_game_client/src/game/state_management/player_vs_ai/game_p_vs_ai_bloc.dart';
 
 class ArenaPvsAiPage extends StatelessWidget {
@@ -28,35 +33,39 @@ class ArenaPvsAiPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    log('arena PvsP with $playerOne vs HiveAI');
     return BlocProvider(
-      create: (context) => GamePVsAiBloc(
-        playerOne,
-      ),
-      child: ArenaPvsAiView(
+      create: (context) =>
+          sl<GamePvsAIBloc>(param1: playerOne, param2: 'HiveAi'),
+      child: ArenaHiveView(
         playerOne: playerOne,
+        playerTwo: 'HiveAI',
       ),
     );
   }
 }
 
-class ArenaPvsAiView extends StatefulWidget {
+class ArenaHiveView extends StatefulWidget {
   final String playerOne;
+  final String playerTwo;
 
-  const ArenaPvsAiView({
+  const ArenaHiveView({
     Key? key,
     required this.playerOne,
+    required this.playerTwo,
   }) : super(key: key);
 
   @override
-  State<ArenaPvsAiView> createState() => ArenaPvsAiViewState();
+  State<ArenaHiveView> createState() => _ArenaHiveViewState();
 }
 
-class ArenaPvsAiViewState extends State<ArenaPvsAiView> {
+class _ArenaHiveViewState extends State<ArenaHiveView> {
   late TransformationController _transformationController;
-  Insect? selectedInsect;
+  int depth = 5;
   bool loaded = false;
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
     _transformationController =
         TransformationController(Matrix4.identity() * 0.1);
@@ -78,57 +87,54 @@ class ArenaPvsAiViewState extends State<ArenaPvsAiView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<GamePVsAiBloc, GamePVsAiState>(
+    return BlocConsumer<GamePvsAIBloc, GamePvsAiState>(
       listener: (context, state) {
-        // TODO: implement listener
+        if (state.arena.insects.any((element) {
+          return (element.position!.x).abs() > depth - 2 ||
+              (element.position!.y).abs() > depth - 2;
+        })) {
+          setState(() {
+            depth = depth * 2;
+          });
+        }
+        if (state.failure != null) {
+          showErrorDialog(
+            context: context,
+            title: 'Error',
+            description: state.failure.toString(),
+          );
+        }
+        if (state.arena.player1.gameOver) {
+          showErrorDialog(
+              context: context,
+              title: 'Game Over',
+              description: 'Player 1, you lost. LOOOOSSSEEERRRR');
+          Navigator.pop(context);
+        }
+        if (state.arena.player2.gameOver) {
+          showErrorDialog(
+              context: context,
+              title: 'Game Over',
+              description: 'Player 2, you lost. LOOOOSSSEEERRRR');
+          Navigator.pop(context);
+        }
       },
       builder: (context, state) {
         return Scaffold(
           appBar: DedicatedAppBar(
             centerTitle: true,
-            title: Text('${widget.playerOne} vs HIVE-AI'),
+            title: Text('${widget.playerOne} vs ${widget.playerTwo}'),
           ),
           backgroundColor: Theme.of(context).backgroundColor,
-          body: LayoutBuilder(builder: (context, constraint) {
-            return Column(
-              children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height / 10,
-                  child: Stack(
-                    children: [
-                      AnimatedFadeInFadeOut(
-                        shouldShow: () => state is! AiTurn,
-                        child: Builder(builder: (context) {
-                          final _child = Container(
-                            color: Theme.of(context).backgroundColor,
-                            child: Center(
-                              child: state is Loading
-                                  ? SizedBox()
-                                  : Text(
-                                      'Wait for your oponents move',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headline5
-                                          ?.copyWith(
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                          ),
-                                    ),
-                            ),
-                          );
-                          if (state is AiTurn) {
-                            return _child;
-                          } else {
-                            return IgnorePointer(
-                              child: _child,
-                            );
-                          }
-                        }),
-                      ),
-                      AnimatedFadeInFadeOut(
-                        shouldShow: () => state is AiTurn,
-                        shouldShrink: false,
-                        child: Container(
+          body: SafeArea(
+            child: LayoutBuilder(builder: (context, constraint) {
+              return Column(
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 10,
+                    child: Stack(
+                      children: [
+                        Container(
                           height: MediaQuery.of(context).size.height / 10,
                           color: Theme.of(context).backgroundColor,
                           child: ListView.builder(
@@ -137,10 +143,12 @@ class ArenaPvsAiViewState extends State<ArenaPvsAiView> {
                             ),
                             scrollDirection: Axis.horizontal,
                             padding: const EdgeInsets.symmetric(
-                                vertical: 5, horizontal: 10),
-                            itemCount: state.aiHand.length,
+                              vertical: 5,
+                              horizontal: 10,
+                            ),
+                            itemCount: state.player2Hand.length,
                             itemBuilder: (context, index) {
-                              final _insect = state.aiHand[index];
+                              final _insect = state.player2Hand[index];
                               return HexagonWidget(
                                 height: MediaQuery.of(context).size.height / 12,
                                 type: HexagonType.FLAT,
@@ -151,6 +159,19 @@ class ArenaPvsAiViewState extends State<ArenaPvsAiView> {
                                 child: Stack(
                                   alignment: Alignment.center,
                                   children: [
+                                    GestureDetector(
+                                      onLongPress: () =>
+                                          showInsectData(context, _insect),
+                                      onDoubleTap: () =>
+                                          showInsectData(context, _insect),
+                                      onTap: () {
+                                        if (state.insectSelectedData != null) {
+                                        } else {
+                                          context.read<GamePvsAIBloc>().add(
+                                              GetPossiblePlacements(_insect));
+                                        }
+                                      },
+                                    ),
                                     Center(
                                       child: IgnorePointer(
                                         child: Image.asset(
@@ -168,263 +189,328 @@ class ArenaPvsAiViewState extends State<ArenaPvsAiView> {
                             },
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Center(
-                    child: InteractiveViewer(
-                      transformationController: _transformationController,
-                      minScale: 0.1,
-                      maxScale: 1,
-                      constrained: false,
-                      child: Builder(
-                        builder: (context) {
-                          WidgetsBinding.instance
-                              ?.addPostFrameCallback((timeStamp) {
-                            if (!loaded) {
-                              loaded = true;
-                              final renderBox =
-                                  context.findRenderObject() as RenderBox?;
-                              final childSize = renderBox?.size ?? Size.zero;
-                              if (childSize != Size.zero) {
-                                print(
-                                    _coverRatio(constraint.biggest, childSize));
-                                _transformationController.value =
-                                    ((Matrix4.identity() *
-                                        _coverRatio(
-                                            constraint.biggest, childSize) *
-                                        0.8) as Matrix4);
-                              }
-                            }
-                          });
-                          return Padding(
-                            padding: const EdgeInsets.all(80.0),
-                            child: HexagonGrid.pointy(
-                              color: Theme.of(context).backgroundColor,
-                              depth: 5,
-                              width: MediaQuery.of(context).size.height * 3,
-                              buildTile: (coordinates) {
-                                final _isPlayer1 = state.arena.player1.insects
-                                    .any((element) =>
-                                        element.position?.x == coordinates.x &&
-                                        element.position?.y == coordinates.y);
-                                final _isPlayer2 = state.arena.player2.insects
-                                    .any((element) =>
-                                        element.position?.x == coordinates.x &&
-                                        element.position?.y == coordinates.y);
-                                final Insect? _insect = _isPlayer1
-                                    ? state.arena.player1.insects.firstWhere(
-                                        (element) =>
-                                            element.position?.x ==
-                                                coordinates.x &&
-                                            element.position?.y ==
-                                                coordinates.y)
-                                    : _isPlayer2
-                                        ? state.arena.player2.insects
-                                            .firstWhere((element) =>
-                                                element.position?.x ==
-                                                    coordinates.x &&
-                                                element.position?.y ==
-                                                    coordinates.y)
-                                        : null;
-                                final _isPossiblePositionForSelectInsect =
-                                    false;
-                                final tileColor = _isPlayer1
-                                    ? Theme.of(context).colorScheme.secondary
-                                    : _isPlayer2
-                                        ? Theme.of(context).primaryColor
-                                        : Theme.of(context).cardColor;
-                                return HexagonWidgetBuilder(
-                                  padding: 4.0,
-                                  cornerRadius: 8.0,
-                                  elevation: 8,
-                                  color: _isPossiblePositionForSelectInsect
-                                      ? CupertinoColors.systemGrey
-                                      : tileColor,
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      GestureDetector(
-                                        onLongPress: () => _insect != null
-                                            ? showInsectData(context, _insect)
-                                            : null,
-                                        onDoubleTap: () => _insect != null
-                                            ? showInsectData(context, _insect)
-                                            : null,
-                                        onTap: () {
-                                          if (selectedInsect != null) {
-                                            if (!(true)) {
-                                              showErrorDialog(
-                                                  context: context,
-                                                  title: 'Movimiento invalido',
-                                                  description:
-                                                      'Este insecto no se puede mover a esta posicion');
-                                            } else {
-                                              context.read<GamePVsAiBloc>().add(
-                                                  SetNewInsect(
-                                                      selectedInsect!,
-                                                      Position(coordinates.x,
-                                                          coordinates.y)));
-                                            }
-
-                                            setState(() {
-                                              selectedInsect = null;
-                                              log('Selected insect is now $_insect');
-                                            });
-                                          } else {
-                                            setState(() {
-                                              selectedInsect = _insect;
-                                              log('Selected insect is now $_insect');
-                                            });
-                                          }
-                                        },
-                                      ),
-                                      IgnorePointer(
-                                        child: LayoutBuilder(
-                                          builder: (context, constraints) {
-                                            return (_insect != null)
-                                                ? Container(
-                                                    constraints: constraint,
-                                                    child: Image.asset(
-                                                      'assets/images/${_insect.type}.png',
-                                                      height:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .height /
-                                                              7,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  )
-                                                : _isPossiblePositionForSelectInsect
-                                                    ? Container(
-                                                        constraints: constraint,
-                                                        child: Image.asset(
-                                                          'assets/images/${selectedInsect!.type}.png',
-                                                          height: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .height /
-                                                              7,
-                                                          fit: BoxFit.cover,
-                                                          color: CupertinoColors
-                                                              .systemGrey4,
-                                                        ),
-                                                      )
-                                                    : const SizedBox.shrink();
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        },
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 10,
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            state.arena.player1.numberOfMoves.toString(),
+                            style: Theme.of(context)
+                                .textTheme
+                                .headline4
+                                ?.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
+                                ),
+                          ),
+                          Text(' : ',
+                              style: Theme.of(context).textTheme.headline4),
+                          Text(
+                            state.arena.player2.numberOfMoves.toString(),
+                            style:
+                                Theme.of(context).textTheme.headline4?.copyWith(
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height / 10,
-                  color: Theme.of(context).backgroundColor,
-                  child: Stack(
-                    children: [
-                      AnimatedFadeInFadeOut(
-                        shouldShow: () => state is! MyTurn,
-                        shouldShrink: false,
-                        child: Builder(builder: (context) {
-                          final _child = Container(
-                            color: Theme.of(context).backgroundColor,
-                            child: Center(
-                              child: Text(
-                                'Wait for your oponents move',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headline5
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondary,
-                                    ),
-                              ),
-                            ),
-                          );
-                          if (state is MyTurn) {
-                            return _child;
-                          } else {
-                            return IgnorePointer(
-                              child: _child,
-                            );
-                          }
-                        }),
-                      ),
-                      AnimatedFadeInFadeOut(
-                        shouldShow: () => state is MyTurn,
-                        shouldShrink: false,
-                        child: ListView.builder(
-                          physics: const BouncingScrollPhysics(
-                            parent: AlwaysScrollableScrollPhysics(),
-                          ),
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 5, horizontal: 10),
-                          itemCount: state.myHand.length,
-                          itemBuilder: (context, index) {
-                            final _insect = state.myHand[index];
-                            return HexagonWidget(
-                              width: MediaQuery.of(context).size.height / 12,
-                              type: HexagonType.FLAT,
-                              padding: 4.0,
-                              cornerRadius: 8.0,
-                              elevation: 8,
-                              color: Theme.of(context).colorScheme.secondary,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  GestureDetector(
-                                    onLongPress: () =>
-                                        showInsectData(context, _insect),
-                                    onDoubleTap: () =>
-                                        showInsectData(context, _insect),
-                                    onTap: () {
-                                      if (selectedInsect == _insect) {
-                                        setState(() {
-                                          selectedInsect = null;
-                                        });
-                                      } else {
-                                        setState(() {
-                                          selectedInsect = _insect;
-                                          log('Selected insect is now $_insect');
-                                        });
-                                      }
-                                    },
-                                  ),
-                                  Center(
-                                    child: IgnorePointer(
-                                      child: Image.asset(
-                                        'assets/images/${_insect.type}.png',
-                                        height:
-                                            MediaQuery.of(context).size.height /
-                                                24,
-                                        // color: Theme.of(context).cardColor,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                  Expanded(
+                    child: Center(
+                      child: InteractiveViewer(
+                        transformationController: _transformationController,
+                        minScale: 0.1,
+                        maxScale: 1,
+                        constrained: false,
+                        child: Builder(
+                          builder: (context) {
+                            WidgetsBinding.instance
+                                ?.addPostFrameCallback((timeStamp) {
+                              if (!loaded) {
+                                loaded = true;
+                                final renderBox =
+                                    context.findRenderObject() as RenderBox?;
+                                final childSize = renderBox?.size ?? Size.zero;
+                                if (childSize != Size.zero) {
+                                  print(_coverRatio(
+                                      constraint.biggest, childSize));
+                                  _transformationController.value =
+                                      ((Matrix4.identity() *
+                                          _coverRatio(
+                                              constraint.biggest, childSize) *
+                                          0.8) as Matrix4);
+                                }
+                              }
+                            });
+                            return Padding(
+                              padding: const EdgeInsets.all(80.0),
+                              child: HexagonGrid.pointy(
+                                color: Theme.of(context).backgroundColor,
+                                depth: depth,
+                                width: MediaQuery.of(context).size.height * 3,
+                                buildTile: (coordinates) {
+                                  final Insect? _insect = state.arena.insects
+                                          .any((element) =>
+                                              element.position?.x ==
+                                                  coordinates.x &&
+                                              element.position?.y ==
+                                                  coordinates.y)
+                                      ? state.arena.insects.firstWhere(
+                                          (element) =>
+                                              element.position?.x ==
+                                                  coordinates.x &&
+                                              element.position?.y ==
+                                                  coordinates.y,
+                                        )
+                                      : null;
+                                  bool _isPlayer1 = false;
+                                  bool _isPlayer2 = false;
+                                  if (_insect != null) {
+                                    _isPlayer1 = _insect.playerId == 'p1';
+                                    _isPlayer2 = _insect.playerId == 'p2';
+                                  }
+                                  final _isPossiblePositionForSelectInsect =
+                                      state.insectSelectedData != null &&
+                                          state.insectSelectedData!.second.any(
+                                            (element) =>
+                                                element.x == coordinates.x &&
+                                                element.y == coordinates.y,
+                                          );
+
+                                  if (_isPossiblePositionForSelectInsect) {
+                                    return possiblePlayTile(
+                                      context,
+                                      state.insectSelectedData!.first,
+                                      _insect,
+                                      coordinates,
+                                      constraint,
+                                    );
+                                  } else if (_insect != null && _isPlayer1) {
+                                    return buildPlayer1Tile(context, _insect,
+                                        coordinates, constraint);
+                                  } else if (_insect != null && _isPlayer2) {
+                                    return buildPlayer2Tile(context, _insect,
+                                        coordinates, constraint);
+                                  } else {
+                                    return emptyTile(
+                                        context, coordinates, constraint);
+                                  }
+
+                                  // return HexagonWidgetBuilder(
+                                  //   padding: 4.0,
+                                  //   cornerRadius: 8.0,
+                                  //   elevation: 8,
+                                  //   color: _isPossiblePositionForSelectInsect
+                                  //       ? CupertinoColors.systemGrey
+                                  //       : tileColor,
+                                  //   child: Stack(
+                                  //     alignment: Alignment.center,
+                                  //     children: [
+                                  //       GestureDetector(
+                                  //         onLongPress: () => _insect != null
+                                  //             ? showInsectData(context, _insect)
+                                  //             : null,
+                                  //         onDoubleTap: () => _insect != null
+                                  //             ? showInsectData(context, _insect)
+                                  //             : null,
+                                  //         onTap: () {
+                                  //           if (state.insectSelectedData !=
+                                  //               null) {
+                                  //             if (!(true)) {
+                                  //             } else {
+                                  //               log('dile al bloc q añada un uevo insecto');
+                                  //               context
+                                  //                   .read<GamePvsPBloc>()
+                                  //                   .add(SetNewInsect(
+                                  //                       state
+                                  //                           .insectSelectedData!
+                                  //                           .first,
+                                  //                       Position(coordinates.x,
+                                  //                           coordinates.y)));
+                                  //             }
+
+                                  //             // setState(() {
+                                  //             //   selectedInsect = null;
+                                  //             //   log('Selected insect is now $_insect');
+                                  //             // });
+                                  //           } else {
+                                  //             // setState(() {
+                                  //             //   selectedInsect = _insect;
+                                  //             //   log('Selected insect is now $_insect');
+                                  //             // });
+                                  //             if (_insect != null) {
+                                  //               context
+                                  //                   .read<GamePvsPBloc>()
+                                  //                   .add(
+                                  //                     GetPossibleMovements(
+                                  //                       _insect,
+                                  //                       Position(
+                                  //                         coordinates.x,
+                                  //                         coordinates.y,
+                                  //                       ),
+                                  //                     ),
+                                  //                   );
+                                  //             }
+                                  //           }
+                                  //         },
+                                  //       ),
+                                  //       IgnorePointer(
+                                  //         child: LayoutBuilder(
+                                  //           builder: (context, constraints) {
+                                  //             return (_insect != null)
+                                  //                 ? Container(
+                                  //                     constraints: constraint,
+                                  //                     child: Image.asset(
+                                  //                       'assets/images/${_insect.type}.png',
+                                  //                       height: MediaQuery.of(
+                                  //                                   context)
+                                  //                               .size
+                                  //                               .height /
+                                  //                           7,
+                                  //                       fit: BoxFit.cover,
+                                  //                     ),
+                                  //                   )
+                                  //                 : _isPossiblePositionForSelectInsect
+                                  //                     ? Container(
+                                  //                         constraints:
+                                  //                             constraint,
+                                  //                         child: Image.asset(
+                                  //                           'assets/images/${state.insectSelectedData!.first.type}.png',
+                                  //                           height: MediaQuery.of(
+                                  //                                       context)
+                                  //                                   .size
+                                  //                                   .height /
+                                  //                               7,
+                                  //                           fit: BoxFit.cover,
+                                  //                           color:
+                                  //                               CupertinoColors
+                                  //                                   .systemGrey4,
+                                  //                         ),
+                                  //                       )
+                                  //                     : const SizedBox.shrink();
+                                  //           },
+                                  //         ),
+                                  //       ),
+                                  //     ],
+                                  //   ),
+                                  // );
+                                },
                               ),
                             );
                           },
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
-            );
-          }),
+                  Container(
+                    height: MediaQuery.of(context).size.height / 10,
+                    color: Theme.of(context).backgroundColor,
+                    child: Stack(
+                      children: [
+                        AnimatedFadeInFadeOut(
+                          shouldShow: () => state.arena.currentPlayerId == 'p2',
+                          shouldShrink: false,
+                          child: Builder(builder: (context) {
+                            final _child = Container(
+                              color: Theme.of(context).backgroundColor,
+                              child: Center(
+                                child: Text(
+                                  'Wait for your oponents move',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headline5
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary,
+                                      ),
+                                ),
+                              ),
+                            );
+                            if (state.arena.currentPlayerId == 'p2') {
+                              return _child;
+                            } else {
+                              return IgnorePointer(
+                                child: _child,
+                              );
+                            }
+                          }),
+                        ),
+                        AnimatedFadeInFadeOut(
+                          shouldShow: () => state.arena.currentPlayerId != 'p2',
+                          shouldShrink: false,
+                          child: ListView.builder(
+                            physics: const BouncingScrollPhysics(
+                              parent: AlwaysScrollableScrollPhysics(),
+                            ),
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 5, horizontal: 10),
+                            itemCount: state.player2Hand.length,
+                            itemBuilder: (context, index) {
+                              final _insect = state.player1Hand[index];
+                              return HexagonWidget(
+                                width: MediaQuery.of(context).size.height / 12,
+                                type: HexagonType.FLAT,
+                                padding: 4.0,
+                                cornerRadius: 8.0,
+                                elevation: 8,
+                                color: Theme.of(context).colorScheme.secondary,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    GestureDetector(
+                                      onLongPress: () =>
+                                          showInsectData(context, _insect),
+                                      onDoubleTap: () =>
+                                          showInsectData(context, _insect),
+                                      onTap: () {
+                                        if (state.insectSelectedData?.first ==
+                                            _insect) {
+                                          // setState(() {
+                                          //   selectedInsect = null;
+                                          // });
+                                        } else {
+                                          context.read<GamePvsAIBloc>().add(
+                                              GetPossiblePlacements(_insect));
+                                          // setState(() {
+                                          //   selectedInsect = _insect;
+                                          //   log('Selected insect is now $_insect');
+                                          // });
+                                        }
+                                      },
+                                    ),
+                                    Center(
+                                      child: IgnorePointer(
+                                        child: Image.asset(
+                                          'assets/images/${_insect.type}.png',
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height /
+                                              24,
+                                          // color: Theme.of(context).cardColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ),
         );
       },
     );

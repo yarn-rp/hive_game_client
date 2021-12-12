@@ -188,39 +188,6 @@ class GamePvsPBloc extends Bloc<GamePvsPEvent, GamePvsPState> {
         player2Hand: state.player2Hand,
       ),
     ));
-
-    if (state is GamePvsPState) {
-      log('Going to chance to player2 Insect');
-
-      // emit(
-      //   Player2Turn(
-      //     arena: state.arena
-      //       ..player1.insects.add(event.insect.copyWith(
-      //             position: event.position,
-      //           )),
-      //     player1Name: player1Name,
-      //     player2Name: player2Name,
-      //     player1Hand: state.player1Hand..remove(event.insect),
-      //     player2Hand: state.player2Hand,
-      //   ),
-      // );
-    } else {
-      if (state is GamePvsPState) {
-        log('Going to chance to player1 Insect');
-        // emit(
-        //   Player1Turn(
-        //     arena: state.arena
-        //       ..player2.insects.add(event.insect.copyWith(
-        //             position: event.position,
-        //           )),
-        //     player1Name: player1Name,
-        //     player2Name: player2Name,
-        //     player1Hand: state.player1Hand,
-        //     player2Hand: state.player2Hand..remove(event.insect),
-        //   ),
-        // );
-      }
-    }
   }
 
   FutureOr<void> getPossibleMovementsHandler(
@@ -250,38 +217,5 @@ class GamePvsPBloc extends Bloc<GamePvsPEvent, GamePvsPState> {
         player2Hand: state.player2Hand,
       ),
     ));
-
-    if (state is GamePvsPState) {
-      log('Going to chance to player2 Insect');
-
-      // emit(
-      //   Player2Turn(
-      //     arena: state.arena
-      //       ..player1.insects.add(event.insect.copyWith(
-      //             position: event.position,
-      //           )),
-      //     player1Name: player1Name,
-      //     player2Name: player2Name,
-      //     player1Hand: state.player1Hand..remove(event.insect),
-      //     player2Hand: state.player2Hand,
-      //   ),
-      // );
-    } else {
-      if (state is GamePvsPState) {
-        log('Going to chance to player1 Insect');
-        // emit(
-        //   Player1Turn(
-        //     arena: state.arena
-        //       ..player2.insects.add(event.insect.copyWith(
-        //             position: event.position,
-        //           )),
-        //     player1Name: player1Name,
-        //     player2Name: player2Name,
-        //     player1Hand: state.player1Hand,
-        //     player2Hand: state.player2Hand..remove(event.insect),
-        //   ),
-        // );
-      }
-    }
   }
 }

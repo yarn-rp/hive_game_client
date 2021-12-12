@@ -79,4 +79,11 @@ class _$HiveGameService extends HiveGameService {
     final $request = Request('POST', $url, client.baseUrl, body: $body);
     return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
   }
+
+  @override
+  Future<Response<Map<String, dynamic>>> playAI() {
+    final $url = '/hive_api/ai/play';
+    final $request = Request('GET', $url, client.baseUrl);
+    return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
+  }
 }

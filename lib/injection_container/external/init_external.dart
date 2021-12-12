@@ -52,7 +52,7 @@ class CustomLogger implements RequestInterceptor, ResponseInterceptor {
 
   @override
   FutureOr<Response> onResponse(Response response) {
-    log(response.base.toString());
+    log('Response : ${response.bodyString} ${response.base.toString()}');
     return response;
   }
 }

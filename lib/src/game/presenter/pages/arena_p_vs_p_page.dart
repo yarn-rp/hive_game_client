@@ -65,7 +65,7 @@ class ArenaHiveView extends StatefulWidget {
 
 class _ArenaHiveViewState extends State<ArenaHiveView> {
   late TransformationController _transformationController;
-
+  int depth = 5;
   bool loaded = false;
   @override
   void initState() {
@@ -113,6 +113,14 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
               title: 'Game Over',
               description: 'Player 2, you lost. LOOOOSSSEEERRRR');
           Navigator.pop(context);
+        }
+        if (state.arena.insects.any((element) {
+          return (element.position!.x).abs() > depth - 2 ||
+              (element.position!.y).abs() > depth - 2;
+        })) {
+          setState(() {
+            depth = depth * 2;
+          });
         }
       },
       builder: (context, state) {
@@ -171,7 +179,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                                 vertical: 5,
                                 horizontal: 10,
                               ),
-                              itemCount: state.player1Hand.length,
+                              itemCount: state.player2Hand.length,
                               itemBuilder: (context, index) {
                                 final _insect = state.player2Hand[index];
                                 return HexagonWidget(
@@ -280,7 +288,7 @@ class _ArenaHiveViewState extends State<ArenaHiveView> {
                               padding: const EdgeInsets.all(80.0),
                               child: HexagonGrid.pointy(
                                 color: Theme.of(context).backgroundColor,
-                                depth: 5,
+                                depth: depth,
                                 width: MediaQuery.of(context).size.height * 3,
                                 buildTile: (coordinates) {
                                   final Insect? _insect = state.arena.insects

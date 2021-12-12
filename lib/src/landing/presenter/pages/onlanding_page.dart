@@ -351,6 +351,7 @@ class OnlandingPage extends StatelessWidget {
                               'playerOne': _playerOneName.isNotEmpty
                                   ? _playerOneName
                                   : 'Player1',
+                              'playerTwo': 'HiveAI',
                             });
                       },
                       color: Theme.of(context).cardColor,

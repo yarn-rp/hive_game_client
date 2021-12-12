@@ -1,51 +1,21 @@
 part of 'game_p_vs_ai_bloc.dart';
 
-abstract class GamePVsAiState {
+class GamePvsAiState {
   final Arena arena;
-  final List<Insect> myHand;
-  final List<Insect> aiHand;
-  final String name;
+  final List<Insect> player1Hand;
+  final Tuple2<Insect, List<Position>>? insectSelectedData;
+  final Failure? failure;
+  final List<Insect> player2Hand;
+  final String player1Name;
+  final String player2Name;
 
-  const GamePVsAiState(
-    this.arena,
-    this.name,
-    this.aiHand,
-    this.myHand,
-  );
-}
-
-class GameInitial extends GamePVsAiState {
-  GameInitial({
-    required Arena arena,
-    required String name,
-    required List<Insect> myHand,
-    required List<Insect> aiHand,
-  }) : super(arena, name, myHand, aiHand);
-}
-
-class Loading extends GamePVsAiState {
-  Loading({
-    required Arena arena,
-    required String name,
-    required List<Insect> myHand,
-    required List<Insect> aiHand,
-  }) : super(arena, name, myHand, aiHand);
-}
-
-class MyTurn extends GamePVsAiState {
-  MyTurn({
-    required Arena arena,
-    required String name,
-    required List<Insect> myHand,
-    required List<Insect> aiHand,
-  }) : super(arena, name, myHand, aiHand);
-}
-
-class AiTurn extends GamePVsAiState {
-  AiTurn({
-    required Arena arena,
-    required String name,
-    required List<Insect> myHand,
-    required List<Insect> aiHand,
-  }) : super(arena, name, myHand, aiHand);
+  const GamePvsAiState({
+    required this.arena,
+    required this.player1Name,
+    required this.player2Name,
+    required this.player1Hand,
+    required this.player2Hand,
+    this.insectSelectedData,
+    this.failure,
+  });
 }

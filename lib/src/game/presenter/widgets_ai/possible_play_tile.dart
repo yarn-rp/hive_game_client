@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:hexagon/hexagon.dart';
 import 'package:hive_game_client/src/game/models/models.dart';
 import 'package:hive_game_client/src/game/presenter/widgets/show_insect_data.dart';
-import 'package:hive_game_client/src/game/state_management/player_vs_player_bloc/game_bloc.dart';
+import 'package:hive_game_client/src/game/state_management/player_vs_ai/game_p_vs_ai_bloc.dart';
+
 import 'package:provider/src/provider.dart';
 
 HexagonWidgetBuilder possiblePlayTile(
@@ -28,7 +29,7 @@ HexagonWidgetBuilder possiblePlayTile(
           onDoubleTap: () => showInsectData(context, _insect),
           onTap: () {
             if (_insect.position == null) {
-              context.read<GamePvsPBloc>().add(
+              context.read<GamePvsAIBloc>().add(
                     SetNewInsect(
                       _insect,
                       Position(coordinates.x, coordinates.y),
@@ -38,7 +39,7 @@ HexagonWidgetBuilder possiblePlayTile(
               if (_currentInsect != null) {
                 log('Ya habia un icho con level : ${_currentInsect.level}');
               }
-              context.read<GamePvsPBloc>().add(
+              context.read<GamePvsAIBloc>().add(
                     ChangeInsectPosition(
                       _insect,
                       Position(coordinates.x, coordinates.y),

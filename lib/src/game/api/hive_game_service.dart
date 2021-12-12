@@ -46,4 +46,6 @@ abstract class HiveGameService extends ChopperService {
     @Field() String type,
     @Field('hexagon') List newPlace,
   );
+  @Get(path: '/hive_api/ai/play')
+  Future<Response<Map<String, dynamic>>> playAI();
 }
